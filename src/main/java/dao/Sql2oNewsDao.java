@@ -1,4 +1,4 @@
 package dao;
 
-public class Sql2oNewsDao {
+public class Sql2oNewsDao implements NewsDao {
 }
