@@ -55,5 +55,7 @@ public class UserTest {
     public void setId() {
     }
 
-
+    public  Users setupusers(){
+        return new Users("Otieno","handle finance business","officer",1);
+    }
 }
