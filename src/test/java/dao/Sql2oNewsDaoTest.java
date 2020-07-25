@@ -1,169 +1,110 @@
 package dao;
 
-import models.Department;
+import models.Department_News;
+import models.Departments;
 import models.News;
-
-import org.junit.*;
+import models.Users;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
-import dao.Sql2oNewsDao;
-import dao.Sql2oDepartmentDao;
 
 import static org.junit.Assert.*;
 
 public class Sql2oNewsDaoTest {
+
+    private static Sql2oDepartmentsDao sql2oDepartmentsDao;
+    private static Sql2oUsersDao sql2oUsersDao;
+    private static Sql2oNewsDao sql2oNewsDao;
     private static Connection conn;
-    private static Sql2oNewsDao newsDao;
-    private static Sql2oDepartmentDao departmentDao;
-    private static Sql2oUsersDao usersDao;
-
-//    @Rule
-//    public DatabaseRule database = new DatabaseRule();
-
 
     @Before
     public void setUp() throws Exception {
-        String connectionString = "jdbc:postgresql://localhost:5432/news_api_test";
-        Sql2o sql2o = new Sql2o(connectionString, "postgres", "Bus-242-001/2014");
-        departmentDao = new Sql2oDepartmentDao(sql2o);
-        newsDao = new Sql2oNewsDao(sql2o);
-        usersDao = new Sql2oUsersDao(sql2o);
+        String connectionString = "jdbc:postgresql://localhost:5432/organisational_news_portal_test";
+        Sql2o sql2o = new Sql2o(connectionString, "buno", "Bruno11057");
+
+        sql2oDepartmentsDao = new Sql2oDepartmentsDao(sql2o);
+        sql2oUsersDao = new Sql2oUsersDao(sql2o);
+        sql2oNewsDao = new Sql2oNewsDao(sql2o);
+        System.out.println("connected to database");
         conn = sql2o.open();
+
     }
 
     @After
     public void tearDown() throws Exception {
-        departmentDao.clearAll();
-        usersDao.clearAll();
-        newsDao.clearAll();
+        sql2oDepartmentsDao.clearAll();
+        sql2oUsersDao.clearAll();
+        sql2oNewsDao.clearAll();
         System.out.println("clearing database");
     }
+
     @AfterClass
-    public static void shutDown() throws Exception{ //changed to static
+    public static void shutDown() throws Exception {
         conn.close();
         System.out.println("connection closed");
     }
 
     @Test
-    public void add() throws Exception{
+    public void addNews() {
+        Users users = setUpNewUsers();
+        sql2oUsersDao.add(users);
+        Departments departments = setUpDepartment();
+        sql2oDepartmentsDao.add(departments);
+        News news = new News("Meeting", "Meeting to set activities for team building", users.getId());
+        sql2oNewsDao.addNews(news);
 
-        News testNews = setupNewNews();
-        int originalNewsId = testNews.getId();
-        newsDao.add(testNews);
-        assertNotEquals(originalNewsId,testNews.getId());
-    }
-
-    @Test
-    public void noNewsReturnsEmptyList() throws Exception{
-
-        assertEquals(0, newsDao.getAll().size());
-    }
-
-    @Test
-    public void addedNewsAreReturnedFromGetAll() throws Exception {
-        News testNews = setupNewNews();
-        newsDao.add(testNews);
-        assertEquals(1, newsDao.getAll().size());
+        assertEquals(users.getId(), sql2oNewsDao.findById(news.getId()).getUser_id());
+        assertEquals(news.getDepartment_id(), sql2oNewsDao.findById(news.getId()).getDepartment_id());
     }
 
 
     @Test
-    public void deleteByIdDeletesCorrectNews() throws Exception{
-        News news = setupNewNews();
-        newsDao.add(news);
-        newsDao.deleteById(news.getId());
-        assertEquals(0, newsDao.getAll().size());
+    public void addDepartmentNews() {
+        Users users = setUpNewUsers();
+        sql2oUsersDao.add(users);
+        Departments departments = setUpDepartment();
+        sql2oDepartmentsDao.add(departments);
+        Department_News department_news = new Department_News("Meeting", "To nominate new chairman", departments.getId()
+                , users.getId());
+        sql2oNewsDao.addDepartmentNews(department_news);
+        assertEquals(users.getId(), sql2oNewsDao.findById(department_news.getId()).getUser_id());
+        assertEquals(department_news.getDepartment_id(), sql2oNewsDao.findById(department_news.getId()).getDepartment_id());
+
     }
+
 
     @Test
-    public void clearAll() throws Exception{
-
-        News testNews = setupNewNews();
-        News otherNews = setupNewNews();
-        newsDao.clearAll();
-        assertEquals(0, newsDao.getAll().size());
-
+    public void getAll() {
+        Users users = setUpNewUsers();
+        sql2oUsersDao.add(users);
+        Departments departments = setUpDepartment();
+        sql2oDepartmentsDao.add(departments);
+        Department_News department_news = new Department_News("Meeting", "To nominate new chairman", departments.getId()
+                , users.getId());
+        sql2oNewsDao.addDepartmentNews(department_news);
+        News news = new News("Meeting", "Meeting to set activities for team building", users.getId());
+        sql2oNewsDao.addNews(news);
+        assertEquals(2, sql2oNewsDao.getAll().size());
     }
+
+
     @Test
-    public void addFoodTypeToDepartmentAddsTypeCorrectly() throws Exception {
-
-        Department testDepartment = setupDepartment();
-        Department altDepartment = setupAltDepartment();
-
-        departmentDao.add(testDepartment);
-        departmentDao.add(altDepartment);
-
-        News testNews = setupNewNews();
-
-        newsDao.add(testNews);
-
-        newsDao.addNewsToDepartment(testNews, testDepartment);
-        newsDao.addNewsToDepartment(testNews, altDepartment);
-
-        assertEquals(2, newsDao.getAllDepartmentsForANews(testNews.getId()).size());
+    public void findById() {
     }
 
-//    @Test
-//    public void deletingDepartmentAlsoUpdatesJoinTable() throws Exception {
-//        News testNews  = new News("Seafood");
-//        newsDao.add(testNews);
-//
-//        Department testDepartment = setupDepartment();
-//        departmentDao.add(testDepartment);
-//
-//        Department altDepartment = setupAltDepartment();
-//        departmentDao.add(altDepartment);
-//
-//        departmentDao.addDepartmentToNews(testDepartment,testNews);
-//        departmentDao.addDepartmentToNews(altDepartment, testNews);
-//
-//        departmentDao.deleteById(testDepartment.getId());
-//        assertEquals(0, departmentDao.getAllNewssByDepartment(testDepartment.getId()).size());
+    //helper
+//    private News setUpNewNews() {
+//        return new News("Meeting","Meeting to set activities for team building");
 //    }
-
-    @Test
-    public void deletingNewsAlsoUpdatesJoinTable() throws Exception {
-
-        Department testDepartment = setupDepartment();
-
-        departmentDao.add(testDepartment);
-
-        News testNews = setupNewNews();
-        News otherFoodType = new News("Japanese");
-
-        newsDao.add(testNews);
-        newsDao.add(otherFoodType);
-
-        newsDao.addNewsToDepartment(testNews, testDepartment);
-        newsDao.addNewsToDepartment(otherFoodType,testDepartment);
-
-        newsDao.deleteById(testDepartment.getId());
-        assertEquals(1, newsDao.getAllDepartmentsForANews(testNews.getId()).size());
+    private Departments setUpDepartment() {
+        return new Departments("Editing", "editing of books");
     }
 
-
-    // helpers
-
-    public News setupNewNews(){
-        return new News("Leave Notice");
-    }
-    public Department setupDepartment (){
-        return new Department("Accounts", "Accounting biz", 23);
-    }
-
-    public Department setupAltDepartment (){
-        return new Department("Accounts", "Accounting biz", 23);
+    private Users setUpNewUsers() {
+        return new Users("Ruth Mwangi", "Manager", "Editor");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 

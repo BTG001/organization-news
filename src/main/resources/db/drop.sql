@@ -1,2 +1,2 @@
-DROP DATABASE news_api;
-DROP DATABASE news_api_test;
+DROP DATABASE organisational_news_portal;
+DROP DATABASE organisational_news_portal_test;

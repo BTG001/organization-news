@@ -7,6 +7,8 @@ group 'com.moringa.organizationnews'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
+mainClassName = "App"
+applicationName = "organization-news"
 
 repositories {
     mavenCentral()
@@ -21,3 +23,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.5'
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
 }
+defaultTasks= ['clean']
+task stage(dependsOn:['clean', 'installDist'])
