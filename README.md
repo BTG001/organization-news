@@ -41,20 +41,19 @@ Clone the App to your local storage and launch it.
 # Getting things ready
  navigate to your project and make necessary changes to the following files
  #### path
- > organization-news/src/main/java/App
-
->>  String connectionString = "jdbc:postgresql://localhost:5432/organisational_news_portal";
-
->>  Sql2o sql2o = new Sql2o(connectionString, "user", "pass");
-
-> organization-news/src/test/java/models/dao/
-
-make necessary changes to the database links in the test files
-
->>  String connectionString = "jdbc:postgresql://localhost:5432/organisational_news_portal_test";
-
->>  Sql2o sql2o = new Sql2o(connectionString, "user", "pass");
+  > News-Portal-App/src/main/java/App
  
+ >>  String connectionString = "jdbc:postgresql://localhost:5432/news_portal_database";
+ 
+ >>  Sql2o sql2o = new Sql2o(connectionString, "user", "pass");
+ 
+ > News-Portal-App/src/test/java/models/dao/
+ 
+ make necessary changes to the database links in the test files
+ 
+ >>  String connectionString = "jdbc:postgresql://localhost:5432/news_portal_database_test";
+ 
+ >>  Sql2o sql2o = new Sql2o(connectionString, "user", "pass");
   # Api Documentation
   
   ## users
